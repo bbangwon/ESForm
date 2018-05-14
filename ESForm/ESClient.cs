@@ -8,7 +8,7 @@ using System.Net.Sockets;
 
 namespace ESForm
 {
-    public class ESClient
+    public class ESClient : ESLogBase
     {
         public class AsyncObject
         {
@@ -30,7 +30,7 @@ namespace ESForm
         AsyncCallback receiveHandler;
         AsyncCallback sendHandler;
 
-        public static Action<string> onLog;
+        public Action<string> onRecvMsg = null;
 
         public ESClient()
         {
@@ -109,8 +109,12 @@ namespace ESForm
             {
                 byte[] msgByte = new byte[recvBytes];
                 Array.Copy(ao.buffer, msgByte, recvBytes);
+                string strRecvMsg = Encoding.UTF8.GetString(msgByte);
 
-                Log(string.Format("메시지 받음: {0}", Encoding.UTF8.GetString(msgByte)));
+                Log(string.Format("메시지 받음: {0}", strRecvMsg));
+
+                if (onRecvMsg != null)
+                    onRecvMsg(strRecvMsg);
             }
 
             try
@@ -147,10 +151,6 @@ namespace ESForm
             }
         }
 
-        public static void Log(string logmsg)
-        {
-            if (onLog != null)
-                onLog(logmsg);
-        }
+
     }
 }

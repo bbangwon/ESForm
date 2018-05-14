@@ -1,0 +1,9 @@
+{
+    "IP": "127.0.0.1",
+    "PORT": 5000,
+    "SerialPortName": "COM1",
+    "BaudRate": 9600,
+    "Parity": "None",
+    "DataBit": 8,
+    "StopBits": 1
+}

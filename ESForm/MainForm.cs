@@ -14,30 +14,54 @@ namespace ESForm
     public partial class MainForm : Form
     {
 
-        ProgramSetting programSetting = null;
+        ProgramSetting programSetting = new ProgramSetting();
         ESClient esClient = new ESClient();
+        ESPorts ports = null;
 
         public MainForm()
         {
             InitializeComponent();
+            ProgramSetting.onLog = Log;
+            ESPorts.onLog = Log;
+            ESClient.onLog = Log;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
             tbSendMsg.Enabled = false;
             btnSend.Enabled = false;
+            radioTCP.Enabled = false;
+            radioSerial.Enabled = false;
+
 
             Log("프로그램 시작");
+            
+            //세팅 정보 초기화
+            bool init = programSetting.Initialize();
+            if(init)
+            {                
+                ports = new ESPorts(programSetting.settings.SerialPortName, programSetting.settings.BaudRate,
+                    programSetting.settings.Parity, programSetting.settings.DataBit, programSetting.settings.StopBits);
 
-            ESClient.onLog = Log;
-            bool isConnected = esClient.ConnectToServer("127.0.0.1", 5000);
+                ports.onRecvData = OnSerialMsgRecv;
 
-            if(isConnected)
-            {
+                esClient.onRecvMsg = OnTCPMsgRecv;
+                bool isConnected = esClient.ConnectToServer(programSetting.settings.IP, programSetting.settings.PORT);
+
                 tbSendMsg.Enabled = true;
                 btnSend.Enabled = true;
+                if (isConnected)
+                {
+                    radioTCP.Enabled = true;
+                    radioSerial.Enabled = true;
+                    radioTCP.Checked = true;
+                }
+                else
+                {
+                    radioSerial.Enabled = true;
+                    radioSerial.Checked = true;
+                }
             }
-
         }
 
 
@@ -60,10 +84,34 @@ namespace ESForm
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            if(esClient.Connected && tbSendMsg.Text.Length > 0)
+            if(radioTCP.Checked)
             {
-                esClient.SendMessage(tbSendMsg.Text);
+                if (esClient.Connected && tbSendMsg.Text.Length > 0)
+                {
+                    esClient.SendMessage(tbSendMsg.Text);
+                }
+            }
+            else
+            {
+                if (tbSendMsg.Text.Length > 0)
+                {
+                    ports.SendData(tbSendMsg.Text);
+                }
             }
         }
+
+        void OnTCPMsgRecv(string msg)
+        {
+            //TCP 메시지 받았을때
+        }
+
+        void OnSerialMsgRecv(string msg)
+        {
+            //Serial 메시지 받았을때
+        }
+
+
+
+
     }
 }

@@ -49,6 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ESClient.cs" />
+    <Compile Include="ESLogBase.cs" />
+    <Compile Include="ESPorts.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
