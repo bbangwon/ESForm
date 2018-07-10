@@ -21,6 +21,7 @@ namespace ESForm
             public string Parity { get; set; }
             public int DataBit {get; set;}
             public float StopBits { get; set; }
+            public int LogUIFormClearTime { get; set; }
         }
 
         public Settings settings
@@ -31,9 +32,8 @@ namespace ESForm
         public bool Initialize()
         {
             try
-            {
-                
-                string json = File.ReadAllText("settings.json");
+            {                
+                string json = File.ReadAllText(@"C:\EM_HW\settings.json");
                 settings = JsonConvert.DeserializeObject<Settings>(json);
                 Log("세팅정보 읽어오기 성공");
                 return true;
@@ -41,7 +41,7 @@ namespace ESForm
             catch (Exception e)
             {
                 Log(e.Message);
-                Log("세팅정보 읽어오기 실패");
+                Log(@"세팅정보 읽어오기 실패 - c:\EM_HW\settings.json 파일 확인해주시기 바랍니다.");
             }
             return false;
         }

@@ -10,7 +10,7 @@ namespace ESForm
     public class ESPorts : ESLogBase
     {
         SerialPort serialPort = null;
-        public Action<string> onRecvData = null;
+        public Action<byte[]> onRecvData = null;
 
         public ESPorts(string portName, int baudRate, string parity, int dataBit, float stopBits)
         {
@@ -68,11 +68,12 @@ namespace ESForm
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort port = (SerialPort)sender;
-            string data = port.ReadExisting();
+            var readByte = new byte[port.BytesToRead];
+            int dataLen = port.Read(readByte, 0, port.BytesToRead);
 
-            Log(string.Format("시리얼포트 받은 데이터 [{0}] : {1}", data.Length, data));
+            Log(string.Format("Serial 받은 데이터 (byte)[{0}] : {1}", dataLen, BitConverter.ToString(readByte).Replace("-", " ")));
             if (onRecvData != null)
-                onRecvData(data);
+                onRecvData(readByte);
 
         }
 
@@ -85,8 +86,18 @@ namespace ESForm
         {
             if(serialPort.IsOpen)
             {
-                serialPort.Write(message);
-                Log(string.Format("시리얼포트 보낸 데이터 [{0}] : {1}", message.Length, message));
+                serialPort.Write(message);                
+                Log(string.Format("Serial 보낸 데이터 (string)[{0}] : {1}", message.Length, message));
+            }
+        }
+
+        public void SendData(byte[] message)
+        {
+            if (serialPort.IsOpen)
+            {
+                serialPort.Write(message, 0, message.Length);
+                Log(string.Format("Serial 보낸 데이터 (byte)[{0}] : {1}", message.Length, BitConverter.ToString(message).Replace("-", " ")));
+                return;
             }
         }
     }

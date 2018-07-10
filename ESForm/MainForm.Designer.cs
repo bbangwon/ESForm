@@ -28,13 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.labelDebug = new System.Windows.Forms.Label();
             this.tbLog = new System.Windows.Forms.TextBox();
             this.tbSendMsg = new System.Windows.Forms.TextBox();
             this.btnSend = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.radioTCP = new System.Windows.Forms.RadioButton();
             this.radioSerial = new System.Windows.Forms.RadioButton();
+            this.radioTCP = new System.Windows.Forms.RadioButton();
+            this.timer_MessageClear = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -88,17 +90,6 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "보낼메시지";
             // 
-            // radioTCP
-            // 
-            this.radioTCP.AutoSize = true;
-            this.radioTCP.Location = new System.Drawing.Point(6, 20);
-            this.radioTCP.Name = "radioTCP";
-            this.radioTCP.Size = new System.Drawing.Size(48, 16);
-            this.radioTCP.TabIndex = 5;
-            this.radioTCP.TabStop = true;
-            this.radioTCP.Text = "TCP";
-            this.radioTCP.UseVisualStyleBackColor = true;
-            // 
             // radioSerial
             // 
             this.radioSerial.AutoSize = true;
@@ -109,6 +100,17 @@
             this.radioSerial.TabStop = true;
             this.radioSerial.Text = "Serial";
             this.radioSerial.UseVisualStyleBackColor = true;
+            // 
+            // radioTCP
+            // 
+            this.radioTCP.AutoSize = true;
+            this.radioTCP.Location = new System.Drawing.Point(6, 20);
+            this.radioTCP.Name = "radioTCP";
+            this.radioTCP.Size = new System.Drawing.Size(48, 16);
+            this.radioTCP.TabIndex = 5;
+            this.radioTCP.TabStop = true;
+            this.radioTCP.Text = "TCP";
+            this.radioTCP.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -121,6 +123,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "MainForm";
             this.Text = "MainForm";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -138,6 +141,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton radioSerial;
         private System.Windows.Forms.RadioButton radioTCP;
+        private System.Windows.Forms.Timer timer_MessageClear;
     }
 }
 

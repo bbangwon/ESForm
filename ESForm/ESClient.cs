@@ -53,7 +53,7 @@ namespace ESForm
             catch(Exception ex)
             {
                 isConnected = false;
-                Log(string.Format("연결중 오류 발생 : {0}", ex.Message));
+                Log(string.Format("TCP 연결중 오류 발생 : {0}", ex.Message));
                 return false;
             }
 
@@ -64,12 +64,12 @@ namespace ESForm
                 AsyncObject ao = new AsyncObject(4096);
                 ao.networkStream = clientSocket.GetStream();
                 ao.networkStream.BeginRead(ao.buffer, 0, ao.buffer.Length, receiveHandler, ao);
-                Log(string.Format("서버 접속 성공 {0}:{1}", host, port));
+                Log(string.Format("TCP 서버 접속 성공 {0}:{1}", host, port));
                 return true;
             }
             else
             {
-                Log(string.Format("서버 접속 실패 {0}:{1}", host, port));
+                Log(string.Format("TCP 서버 접속 실패 {0}:{1}", host, port));
             }
             return false;
         }
@@ -89,7 +89,7 @@ namespace ESForm
             }
             catch(Exception ex)
             {
-                Log(string.Format("전송중 오류발생! {0}", ex.Message));
+                Log(string.Format("TCP 전송중 오류발생! {0}", ex.Message));
             }
         }
 
@@ -111,7 +111,7 @@ namespace ESForm
                 Array.Copy(ao.buffer, msgByte, recvBytes);
                 string strRecvMsg = Encoding.UTF8.GetString(msgByte);
 
-                Log(string.Format("메시지 받음: {0}", strRecvMsg));
+                Log(string.Format("TCP로 메시지 받음: {0}", strRecvMsg));
 
                 if (onRecvMsg != null)
                     onRecvMsg(strRecvMsg);
@@ -123,7 +123,7 @@ namespace ESForm
             }
             catch(Exception ex)
             {
-                Log(string.Format("자료 수신 대기 도중 오류 발생! 메시지: {0}", ex.Message));
+                Log(string.Format("TCP 자료 수신 대기 도중 오류 발생! 메시지: {0}", ex.Message));
                 return;
             }
         }
@@ -138,7 +138,7 @@ namespace ESForm
             }
             catch(Exception ex)
             {
-                Log(string.Format("자료 송신 도중 오류 발생! 메시지: {0}", ex.Message));
+                Log(string.Format("TCP 자료 송신 도중 오류 발생! 메시지: {0}", ex.Message));
             }
 
             int sentBytes = ao.buffer.Length;
@@ -147,7 +147,7 @@ namespace ESForm
                 byte[] msgByte = new byte[sentBytes];
                 Array.Copy(ao.buffer, msgByte, sentBytes);
 
-                Log(string.Format("메세지 보냄: {0}", Encoding.UTF8.GetString(msgByte)));
+                Log(string.Format("TCP로 메세지 보냄: {0}", Encoding.UTF8.GetString(msgByte)));
             }
         }
 
