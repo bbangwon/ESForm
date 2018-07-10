@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 
 namespace ESForm
 {
     public partial class MainForm : Form
     {
-
         ProgramSetting programSetting = new ProgramSetting();
         ESClient esClient = new ESClient();
-        ESPorts ports = null;
+        List<ESPorts> ports = new List<ESPorts>();         
         StreamWriter logWriter = null;
+        Dictionary<string, string> busLRMode = new Dictionary<string, string>();
 
         public MainForm()
         {
@@ -34,8 +30,7 @@ namespace ESForm
             tbSendMsg.Enabled = false;
             btnSend.Enabled = false;
             radioTCP.Enabled = false;
-            radioSerial.Enabled = false;
-            
+            radioSerial.Enabled = false;            
 
             Log("프로그램 시작");
             
@@ -45,10 +40,14 @@ namespace ESForm
             {
                 try
                 {
-                    ports = new ESPorts(programSetting.settings.SerialPortName, programSetting.settings.BaudRate,
-                        programSetting.settings.Parity, programSetting.settings.DataBit, programSetting.settings.StopBits);
-
-                    ports.onRecvData = OnSerialMsgRecv;
+                    foreach(var portSetting in programSetting.settings.SerialPorts)
+                    {
+                        
+                        ESPorts port = new ESPorts(portSetting.SerialPortName, portSetting.BaudRate, portSetting.Parity, portSetting.DataBit, portSetting.StopBits);
+                        busLRMode[portSetting.SerialPortName] = portSetting.BusLRMode;
+                        port.onRecvData = OnSerialMsgRecv;
+                        ports.Add(port);
+                    }
                     radioSerial.Enabled = true;
                 }
                 catch(Exception ex)
@@ -116,6 +115,7 @@ namespace ESForm
 
         private void btnSend_Click(object sender, EventArgs e)
         {
+            /*
             if(radioTCP.Checked)
             {
                 if (esClient.Connected && tbSendMsg.Text.Length > 0)
@@ -127,9 +127,14 @@ namespace ESForm
             {                
                 if (tbSendMsg.Text.Length > 0)
                 {
-                    ports.SendData(tbSendMsg.Text);
+                    ports.ForEach(_ => _.SendData(tbSendMsg.Text));
                 }              
             }
+            */
+
+
+            //테스트..
+            OnSerialMsgRecv("COM2", Encoding.Default.GetBytes("A:0000 B:0000 C:0000 D:0000 T:0000"));
         }
 
         void OnTCPMsgRecv(string msg)
@@ -137,32 +142,38 @@ namespace ESForm
             //TCP 메시지 받았을때            
             if (msg == "Connected")
                 return;
-
-            if (msg.Substring(0, 9) == "SEND_FLA ") //FLASH에서 Echo한 메시지는 무시처리
-                return;
-
-            Log(string.Format("(TCP수신처리) TCP 받은 메시지 : (string){0}", msg));
-            if (msg.Substring(0, 8) == "SEND_HW ")
-                msg = msg.Substring(8);
-
-            if (msg[0] == 'F' || msg[0] == 'f')
+            try
             {
-                var writeArray = Enumerable.Range(0, msg.Length).Where(x => x % 3 == 0).Select(x => Convert.ToByte(msg.Substring(x, 2), 16)).ToArray();
-                Log(string.Format("(TCP수신처리) Serial 보낸 메시지 : (byte){0}", msg));
-                ports.SendData(writeArray);
+                if (msg.Substring(0, 9) == "SEND_FLA ") //FLASH에서 Echo한 메시지는 무시처리
+                    return;
+
+                Log(string.Format("(TCP수신처리) TCP 받은 메시지 : (string){0}", msg));
+                if (msg.Substring(0, 8) == "SEND_HW ")
+                    msg = msg.Substring(8);
+
+                if (msg[0] == 'F' || msg[0] == 'f')
+                {
+                    var writeArray = Enumerable.Range(0, msg.Length).Where(x => x % 3 == 0).Select(x => Convert.ToByte(msg.Substring(x, 2), 16)).ToArray();
+                    Log(string.Format("(TCP수신처리) Serial 보낸 메시지 : (byte){0}", msg));
+                    ports.ForEach(_ => _.SendData(writeArray));
+                }
+                else
+                {
+                    Log(string.Format("(TCP수신처리) Serial 보낸 메시지 : (string){0}", msg));
+                    ports.ForEach(_ => _.SendData(msg));
+                }
+            }
+            catch (Exception e)
+            {
+                Log(string.Format("(TCP수신처리) 처리중에러 : {0}", e.Message));
                 
             }
-            else
-            {
-                Log(string.Format("(TCP수신처리) Serial 보낸 메시지 : (string){0}", msg));
-                ports.SendData(msg);
-            }          
         }
 
-        void OnSerialMsgRecv(byte[] msg)
+        void OnSerialMsgRecv(string portName, byte[] msg)
         {
             string sendString = BitConverter.ToString(msg).Replace("-", " ");
-            Log(string.Format("(Serial수신처리) Serial 받은 메시지 : (byte){0}", sendString));
+            Log(string.Format("(Serial [{0}] 수신처리) Serial 받은 메시지 : (byte){1}", portName, sendString));
             //Serial 메시지 받았을때
 
             if(sendString[0] == 'F' || sendString[0] == 'f')
@@ -176,11 +187,15 @@ namespace ESForm
 
             StringBuilder sb = new StringBuilder();
             sb.Append("SEND_FLA "); //Header
+            if(sendString[0] == 'A')
+            {
+                sb.Append(programSetting.settings.BusPCNum + " ");
+                sb.Append(busLRMode[portName] + " ");
+            }
             sb.Append(sendString);
 
-            Log(string.Format("(Serial수신처리) TCP 보낸 메시지 : (string){0}", sb.ToString()));
+            Log(string.Format("(Serial [{0}] 수신처리) TCP 보낸 메시지 : (string){1}", portName, sb.ToString()));
             esClient.SendMessage(sb.ToString());
-            
         }
 
         private void timer_MessageClear_Tick(object sender, EventArgs e)

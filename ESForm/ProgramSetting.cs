@@ -11,16 +11,22 @@ namespace ESForm
     
     public class ProgramSetting : ESLogBase
     {
+        public class SerialPort
+        {
+            public string SerialPortName { get; set; }
+            public int BaudRate { get; set; }
+            public string Parity { get; set; }
+            public int DataBit { get; set; }
+            public float StopBits { get; set; }
+            public string BusLRMode { get; set; }
+        }
 
         public class Settings
         {
             public string IP { get; set; }
             public int PORT { get; set; }
-            public string SerialPortName { get; set; }
-            public int BaudRate { get; set; }
-            public string Parity { get; set; }
-            public int DataBit {get; set;}
-            public float StopBits { get; set; }
+            public int BusPCNum { get; set; }
+            public SerialPort[] SerialPorts { get; set; }
             public int LogUIFormClearTime { get; set; }
         }
 
