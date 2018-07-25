@@ -26,7 +26,7 @@ namespace ESForm
         }
 
         bool connected;
-        TcpClient clientSocket;
+        TcpClient clientSocket = new TcpClient();
         AsyncCallback receiveHandler;
         AsyncCallback sendHandler;
 
@@ -39,28 +39,23 @@ namespace ESForm
         }
         public bool Connected
         {
-            get => connected;
+            get => clientSocket.Connected;
         }
 
         public bool ConnectToServer(string host, int port)
         {
-            bool isConnected = false;
             try
             {
-                clientSocket = new TcpClient(host, port);
-                isConnected = true;                
+                clientSocket.Connect(host, port);                
             }
             catch(Exception ex)
             {
-                isConnected = false;
                 Log(string.Format("TCP 연결중 오류 발생 : {0}", ex.Message));
                 return false;
             }
 
-            connected = isConnected;
-            if (isConnected)
+            if (Connected)
             {
-                
                 AsyncObject ao = new AsyncObject(4096);
                 ao.networkStream = clientSocket.GetStream();
                 ao.networkStream.BeginRead(ao.buffer, 0, ao.buffer.Length, receiveHandler, ao);
@@ -77,6 +72,7 @@ namespace ESForm
         public void StopClient()
         {
             clientSocket.Close();
+            clientSocket = new TcpClient();
         }
 
         public void SendMessage(string message)
@@ -115,16 +111,21 @@ namespace ESForm
 
                 if (onRecvMsg != null)
                     onRecvMsg(strRecvMsg);
-            }
 
-            try
-            {
-                ao.networkStream.BeginRead(ao.buffer, 0, ao.buffer.Length, receiveHandler, ao);
+                try
+                {
+                    ao.networkStream.BeginRead(ao.buffer, 0, ao.buffer.Length, receiveHandler, ao);
+                }
+                catch (Exception ex)
+                {
+                    Log(string.Format("TCP 자료 수신 대기 도중 오류 발생! 메시지: {0}", ex.Message));
+                    return;
+                }
             }
-            catch(Exception ex)
+            else
             {
-                Log(string.Format("TCP 자료 수신 대기 도중 오류 발생! 메시지: {0}", ex.Message));
-                return;
+                Log("Disconnect 등의 이유로 네트워크 종료");
+                StopClient();
             }
         }
 

@@ -37,6 +37,7 @@
             this.radioSerial = new System.Windows.Forms.RadioButton();
             this.radioTCP = new System.Windows.Forms.RadioButton();
             this.timer_MessageClear = new System.Windows.Forms.Timer(this.components);
+            this.timer_reconnect_try = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -123,6 +124,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "MainForm";
             this.Text = "MainForm";
+            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);
@@ -142,6 +144,7 @@
         private System.Windows.Forms.RadioButton radioSerial;
         private System.Windows.Forms.RadioButton radioTCP;
         private System.Windows.Forms.Timer timer_MessageClear;
+        private System.Windows.Forms.Timer timer_reconnect_try;
     }
 }
 
