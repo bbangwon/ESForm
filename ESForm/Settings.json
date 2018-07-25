@@ -1,9 +1,24 @@
 {
     "IP": "127.0.0.1",
-    "PORT": 5000,
-    "SerialPortName": "COM1",
-    "BaudRate": 9600,
-    "Parity": "None",
-    "DataBit": 8,
-    "StopBits": 1
+    "PORT": 6600,
+    "BusPCNum": 1,
+    "SerialPorts" : [
+        {
+            "SerialPortName": "COM1",
+            "BaudRate": 9600,
+            "Parity": "None",
+            "DataBit": 8,
+            "StopBits": 1,
+            "BusLRMode" : "L"
+        },
+        {
+            "SerialPortName": "COM2",
+            "BaudRate": 9600,
+            "Parity": "None",
+            "DataBit": 8,
+            "StopBits": 1,
+            "BusLRMode" : "R"
+        }
+    ],
+    "LogUIFormClearTime": 600
 }
