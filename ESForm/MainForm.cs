@@ -187,30 +187,34 @@ namespace ESForm
 
                 Log(string.Format("(TCP수신처리) TCP 받은 메시지 : (string){0}", msg));
                 if (msg.Substring(0, 8) == "SEND_HW ")
+                {
                     msg = msg.Substring(8);
 
-                if (msg[0] == 'F' || msg[0] == 'f')
-                {
-                    var writeArray = Enumerable.Range(0, msg.Length).Where(x => x % 3 == 0).Select(x => Convert.ToByte(msg.Substring(x, 2), 16)).ToArray();
+                    if (msg[0] == 'F' || msg[0] == 'f')
+                    {
+                        var writeArray = Enumerable.Range(0, msg.Length).Where(x => x % 3 == 0).Select(x => Convert.ToByte(msg.Substring(x, 2), 16)).ToArray();
 
-                    if(writeArray[1] == 0x00)
-                    {
-                        Log(string.Format("(TCP수신처리-경광등) Serial 보낸 메시지 : (byte){0}", msg));
-                        ports.FirstOrDefault(_ => _.alertPort).SendData(writeArray);
-                    }
-                    else
-                    {
-                        Log(string.Format("(TCP수신처리-일반) Serial 보낸 메시지 : (byte){0}", msg));
-                        ports.FirstOrDefault(_ => !_.alertPort).SendData(writeArray);
+                        if (writeArray[1] == 0x00)
+                        {
+                            Log(string.Format("(TCP수신처리-경광등) Serial 보낸 메시지 : (byte){0}", msg));
+                            ports.FirstOrDefault(_ => _.alertPort).SendData(writeArray);
+                        }
+                        else
+                        {
+                            Log(string.Format("(TCP수신처리-일반) Serial 보낸 메시지 : (byte){0}", msg));
+                            ports.Where(_ => !_.alertPort).ToList().ForEach(_=>_.SendData(writeArray));
+                        }
                     }
                 }
                 else
                 {
-                    if(msg != "AliveCheck")
+                    /*
+                    if (msg != "AliveCheck")
                     {
                         Log(string.Format("(TCP수신처리) Serial 보낸 메시지 : (string){0}", msg));
                         ports.ForEach(_ => _.SendData(msg));
                     }
+                    */
                 }
             }
             catch (Exception e)
